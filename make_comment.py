@@ -21,7 +21,7 @@ def parse_conf():
 	return res
 
 
-def comment(file_or_path=None, depth=5, type=['py']):
+def comment(file_or_path=None, depth=5, file_type=['py']):
 	'''
 	Traverse from file_or_path in depth, and which type of files
 	you wanna make comment.
@@ -33,7 +33,54 @@ def comment(file_or_path=None, depth=5, type=['py']):
 	'''
 	### parse the config file: common.conf
 	cf = parse_conf()
-	print cf
+	# print cf
+
+	### traverse from file_or_path in depth to make top comment 
+	### to each type of files in the parameter type
+	for each_type in file_type:
+		comment_msg = build_comment_msg(cf, each_type)
+		comment_on(file_or_path, depth, each_type, comment_msg)
+
+	return 
+
+def comment_on(file_or_path, depth, each_type, comment_msg):
+	'''
+	A lowwer API for comment func
+	'''
+	import os
+	import fileinput
+
+	temp_depth = depth
+	for root, dirs, files in os.walk(file_or_path):
+		# files = os.path.join(root, files)
+		for each_file in files:
+			each_file = os.path.join(root, each_file)
+			if '.' not in each_file or each_type not in each_file:
+				continue
+			else:
+				flag = True
+				for line in fileinput.input(each_file, inplace=1):
+					if flag:
+						print comment_msg
+						print line,
+						flag = False
+					else:
+						print line,
+	return
+
+def build_comment_msg(cf, each_type):
+	'''
+	Build cooment msg according to the correspond file type;
+	'''
+	msg = ''
+	for term in cf:
+		msg += (term + ': ' + cf[term] + '\n')
+
+	return msg
 
 if __name__=='__main__':
-	comment()
+	cf = parse_conf()
+	each_type = 'py'
+	msg = build_comment_msg(cf, each_type)
+
+	print msg
